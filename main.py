@@ -1,9 +1,10 @@
 from telegram import Bot
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
+import appsetting
 
 # Initialize your bot with the API token
-bot = Bot(token="YOUR_BOT_API_TOKEN")
+bot = Bot(token=appsetting.appsetting.accl_alert_bot_API_TOKEN)
 
 app = FastAPI()
 
