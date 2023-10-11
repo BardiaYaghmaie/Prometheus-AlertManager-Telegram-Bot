@@ -16,17 +16,15 @@ class PrometheusAlert(BaseModel):
 
 @app.post('/alert')
 async def alert(alert: PrometheusAlert):
-    status_icon = "⌛️" if alert.status == "firing" else "✅"
-    severity_icon = "❗️" if "severity" in alert.commonLabels else ""
+    status_icon = "❗️" if alert.status == "firing" else "✅"
 
-    message = f"{status_icon} Status: {alert.status} {severity_icon}\n"
-    message += f"🔗 Source: {alert.externalURL}\n"
-    message += "🏷 Labels:\n"
+    message = f"{status_icon} Status: {alert.status} \n\n"
+    message += "\n🏷 Labels:\n"
     for key, value in alert.commonLabels.items():
         message += f"- {key} = {value}\n"
-    message += "📝 Annotations:\n"
+    message += "\n📝 Annotations:\n"
     for key, value in alert.commonAnnotations.items():
         message += f"- {key} = {value}\n"
 
-    bot.send_message(chat_id=appsetting.appsetting.accl_alert_group_CHAT_ID, text=message)
+    await bot.send_message(chat_id=appsetting.appsetting.accl_alert_group_CHAT_ID, text=message)
     return {"message": "Alert received and sent to the group."}
