@@ -4,5 +4,5 @@ services:
     container_name: alertmanagerbot
     build: .
     ports:
-      - '8776:8776'
+      - '80:80'
     restart: unless-stopped

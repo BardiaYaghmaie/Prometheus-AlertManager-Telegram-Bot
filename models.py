@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, Union, List
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 
 class PrometheusAlert(BaseModel):
     status: str

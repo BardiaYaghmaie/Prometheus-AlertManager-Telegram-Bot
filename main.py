@@ -29,22 +29,7 @@ async def alert(alert: PrometheusAlert):
 @app.post("/webhook")
 async def telegram_webhook(update: Update):
     message = update.message
-    if update.callback_query:
-        data = update.callback_query.data
-        mode = 'Started' if data[0] == 'S' else 'Finished'
-        message_id = int(data.replace(data[0], ''))
-        text_to_send = "{} {} Resolving".format( update.callback_query.from_user.first_name, mode)
-
-        await bot.send_message(
-            chat_id=user_chat_id,
-            reply_to_message_id=message_id,
-            text=text_to_send
-        )
-        return
-
-    chat_id = message.chat.id
     text = message.text
-
     if text:
         if "/start" in text:
             response_text = "Welcome to your Telegram bot!"
