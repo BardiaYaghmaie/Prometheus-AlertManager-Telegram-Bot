@@ -1,18 +1,14 @@
-from fastapi import FastAPI, Request
-from pydantic import BaseModel
+from fastapi import FastAPI
+from models import PrometheusAlert, Update
 from telegram import Bot
 import appsetting  # Assuming this module contains your API token
 
 app = FastAPI()
+user_chat_id = appsetting.appsetting.USER_CHAT_ID
+bot_api_token = appsetting.appsetting.BOT_API_TOKEN
 
 # Initialize your bot with the API token
-bot = Bot(token=appsetting.appsetting.accl_alert_bot_API_TOKEN)
-
-class PrometheusAlert(BaseModel):
-    status: str
-    externalURL: str
-    commonLabels: dict
-    commonAnnotations: dict
+bot = Bot(token=bot_api_token)
 
 @app.post('/alert')
 async def alert(alert: PrometheusAlert):
@@ -26,5 +22,36 @@ async def alert(alert: PrometheusAlert):
     for key, value in alert.commonAnnotations.items():
         message += f"- {key} = {value}\n"
 
-    await bot.send_message(chat_id=appsetting.appsetting.accl_alert_group_CHAT_ID, text=message)
+    await bot.send_message(chat_id=user_chat_id, text=message)
     return {"message": "Alert received and sent to the group."}
+
+
+@app.post("/webhook")
+async def telegram_webhook(update: Update):
+    message = update.message
+    if update.callback_query:
+        data = update.callback_query.data
+        mode = 'Started' if data[0] == 'S' else 'Finished'
+        message_id = int(data.replace(data[0], ''))
+        text_to_send = "{} {} Resolving".format( update.callback_query.from_user.first_name, mode)
+
+        await bot.send_message(
+            chat_id=user_chat_id,
+            reply_to_message_id=message_id,
+            text=text_to_send
+        )
+        return
+
+    chat_id = message.chat.id
+    text = message.text
+
+    if text:
+        if "/start" in text:
+            response_text = "Welcome to your Telegram bot!"
+        else:
+            response_text = "You said: " + text
+
+        # Send a response to the user
+        await bot.send_message(chat_id=user_chat_id, text=response_text)
+
+    return {"message": "Received update"}

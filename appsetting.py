@@ -1,3 +1,3 @@
 class appsetting:
-    accl_alert_bot_API_TOKEN = "*****************"
-    accl_alert_group_CHAT_ID = "***********"
+    BOT_API_TOKEN = "6369961522:AAF99DS5RfN4IFIx9bQfS2AOegcDv9HI8f4"
+    USER_CHAT_ID = "62842541"
