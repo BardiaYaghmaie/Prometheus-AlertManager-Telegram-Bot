@@ -44,9 +44,9 @@ global:
 route:
   group_by: ['alertname']
   group_wait: 10s       # wait up to 10s for more alerts to group them
-  receiver: 'telepush_dev'  # see below
+  receiver: 'alertmanager_telegram_bot'  # see below
 receivers:
-- name: 'telepush_dev'
+- name: 'alertmanager_telegram_bot'
   webhook_configs:
   - url: 'https://alertmanager-server-url/alert'
     http_config:
