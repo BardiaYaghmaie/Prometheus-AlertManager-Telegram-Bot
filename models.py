@@ -7,6 +7,7 @@ class PrometheusAlert(BaseModel):
     externalURL: str
     commonLabels: dict
     commonAnnotations: dict
+
 class Bot(BaseModel):
     """
     Contains your bot token
