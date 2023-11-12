@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from models import PrometheusAlert, Update
-from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Bot
+from keyboards import *
 import appsetting  # Assuming this module contains your API token
 
 app = FastAPI()
@@ -24,11 +25,11 @@ async def alert(alert: PrometheusAlert):
     for key, value in alert.commonAnnotations.items():
         message += f"- {key} = {value}\n"
 
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Start to Resolve", callback_data='start_resolve')]
-    ])
 
-    await bot.send_message(chat_id=user_chat_id, text=message, reply_markup=keyboard)
+
+    await bot.send_message(chat_id=user_chat_id, text=message, reply_markup=start_keyboard)
+
+
     return {"message": "Alert received and sent to the group."}
 
 
@@ -39,6 +40,9 @@ async def telegram_webhook(update: Update):
 
     if callback_query:
         callback_message = callback_query.message
+        c_user = callback_query.from_user
+        username = c_user.username
+        firstname = c_user.first_name
         if callback_query.data == 'start_resolve':
             c_user = callback_query.from_user
             username = c_user.username
@@ -48,14 +52,35 @@ async def telegram_webhook(update: Update):
                     text=f"{firstname.title()} (@{username}) started resolving this issue",
                     chat_id=user_chat_id,
                     reply_to_message_id=callback_message.message_id
-                )
+            )
+            await bot.editMessageReplyMarkup(
+                message_id=callback_message.message_id,
+                chat_id=user_chat_id,
+                reply_markup=resolved_keyboard
+            )
+
+        if callback_query.data == 'resolved':
+            await bot.send_message(
+                    text=f"{firstname.title()} (@{username}) resolved this issue.",
+                    chat_id=user_chat_id,
+                    reply_to_message_id=callback_message.message_id
+            )
+            await bot.editMessageReplyMarkup(
+                message_id=callback_message.message_id,
+                chat_id=user_chat_id,
+                reply_markup=final_keyboard
+            )
+
         return
 
     if message.text:
+        t_user = message.from_user
+        username = t_user.username
+        firstname = t_user.first_name
         if "/start" in message.text:
             response_text = "Welcome to your Telegram bot!"
         else:
-            response_text = "You said: " + message.text
+            response_text = f"{firstname} (@{username}) said: " + message.text
 
         # Send a response to the user
         await bot.send_message(chat_id=user_chat_id, text=response_text)
